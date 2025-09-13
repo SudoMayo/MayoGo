@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MayoGo - GPA Calculator</title>
+    <meta name="description" content="GPA and CGPA calculator for Vijaybhoomi University students">
+    <meta name="theme-color" content="#4285f4">
+    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiTWF5b0dvIiwibGFuZyI6ImVuLVVTIiwiZGVzY3JpcHRpb24iOiJBIHV0aWxpdHkgYXBwIGZvciB1bml2ZXJzaXR5IHN0dWRlbnRzIiwic3RhcnRfdXJsIjoiLyIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiYmFja2dyb3VuZF9jb2xvciI6IiNmZmZmZmYiLCJ0aGVtZV9jb2xvciI6IiM0Mjg1ZjQifQ==">
+    <style>
+        :root {
+            --primary-color: #4285f4;
+            --secondary-color: #34a853;
+            --error-color: #ea4335;
+            --text-color: #333;
+            --light-bg: #f9f9f9;
+            --header-color: #1a73e8;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            color: var(--text-color);
+            line-height: 1.6;
+            background-color: #fff;
+        }
+        
+        header {
+            background-color: var(--header-color);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 1rem;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .tab {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 1rem;
+            color: var(--text-color);
+            opacity: 0.7;
+        }
+        
+        .tab.active {
+            opacity: 1;
+            border-bottom: 2px solid var(--primary-color);
+            font-weight: 500;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 1rem;
+        }
+        
+        button:hover {
+            background-color: #3367d6;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: var(--light-bg);
+        }
+        
+        .course-row {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 0.5rem;
+            align-items: center;
+        }
+        
+        .flex-grow {
+            flex-grow: 1;
+        }
+        
+        .remove-btn {
+            background-color: var(--error-color);
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1.2rem;
+            margin-top: 0;
+        }
+        
+        .add-course-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .result-card {
+            background-color: var(--light-bg);
+            border-left: 4px solid var(--primary-color);
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 4px;
+        }
+        
+        .info-icon {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background-color: #ddd;
+            color: #333;
+            text-align: center;
+            font-size: 12px;
+            line-height: 18px;
+            margin-left: 5px;
+            cursor: help;
+        }
+        
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .tooltip .tooltip-text {
+            visibility: hidden;
+            width: 200px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        
+        .tooltip:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        .grade-table {
+            width: 100%;
+            margin: 1rem 0;
+            border-collapse: collapse;
+        }
+        
+        .grade-table th, .grade-table td {
+            padding: 0.5rem;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        
+        .grade-table th {
+            background-color: var(--light-bg);
+        }
+        
+        .term-card {
+            border-left: 4px solid var(--secondary-color);
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .term-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .student-info {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .semester-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        @media (max-width: 600px) {
+            .course-row {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .remove-btn {
+                align-self: flex-end;
+            }
+            
+            .term-header, .semester-info {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header id="main-header">
+        <h1>MayoGo</h1>
+        <p>Making university life easier</p>
+    </header>
+    
+    <div id="main-app-message" style="display:none; text-align:center; font-weight:500; margin: 1rem 0;">Use the tabs below to navigate through your academic tools.</div>
+    <div class="container">
+        <div class="tabs" id="main-tabs">
+            <button class="tab active" onclick="openTab('profile')">My Profile</button>
+            <button class="tab" onclick="openTab('reach-cgpa')">Reach Your CGPA</button>
+            <button class="tab" onclick="openTab('gpa')">Term GPA</button>
+            <button class="tab" onclick="openTab('cgpa')">Cumulative GPA</button>
+            <button class="tab" onclick="openTab('info')">Grading Info</button>
+        </div>
+
+        <div id="welcome" style="display:none;">
+            <div class="card" style="text-align:center;">
+                <div style="margin-bottom: 2rem;">
+                    <img src="squidward_logo.jpg" alt="MayoGo Logo" style="width:120px; border-radius:16px;" />
+                </div>
+                <div style="margin-bottom: 2rem;"></div>
+                <div style="font-size:1.1rem; margin-bottom:2.5rem; font-style:italic; color:#555;">Created while procrastinating something else.</div>
+                <h2 id="welcome-greeting">Welcome!</h2>
+                <button id="welcome-continue-btn" style="margin-top:2rem; font-size:1.1rem; padding:0.7rem 2rem; border-radius:8px; background:var(--primary-color); color:white; border:none; cursor:pointer;">Continue</button>
+            </div>
+        </div>
+        
+        <div id="profile" class="tab-content active">
+            <div class="card">
+                <h2>Student Profile</h2>
+                <p>Set up your profile information</p>
+                
+                <div class="form-group">
+                    <label for="student-name">Name:</label>
+                    <input type="text" id="student-name" placeholder="Enter your full name">
+                </div>
+                
+                <div class="form-group">
+                    <label for="student-program">Program:</label>
+                    <input type="text" id="student-program" placeholder="e.g. Liberal-Bachelor">
+                </div>
+                
+                <div class="form-group">
+                    <label for="student-roll">Roll Number:</label>
+                    <input type="text" id="student-roll" placeholder="e.g. 2024SEPVUGPXXXX">
+                </div>
+                
+                <button onclick="saveProfile()">Save Profile</button>
+                
+                <div id="profile-saved" class="result-card" style="display: none; margin-top: 1rem;">
+                    <h3>Profile Saved</h3>
+                    <div id="profile-details"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="reach-cgpa" class="tab-content">
+            <div class="card">
+                <h2>Reach Your CGPA</h2>
+                <p>Find out what GPA and grades you need next term to reach your target CGPA.</p>
+                <div class="form-group">
+                    <label for="current-cgpa">Current CGPA:</label>
+                    <input type="number" id="current-cgpa" step="0.01" min="0" max="10" placeholder="e.g. 7.2">
+                </div>
+                <div class="form-group">
+                    <label for="completed-credits">Total Credits Completed:</label>
+                    <input type="number" id="completed-credits" min="1" placeholder="e.g. 60">
+                </div>
+                <div class="form-group">
+                    <label for="target-cgpa-input">Target CGPA:</label>
+                    <input type="number" id="target-cgpa-input" step="0.01" min="0" max="10" placeholder="e.g. 8.0">
+                </div>
+                <div class="form-group">
+                    <label for="next-term-credits">Credits Next Term:</label>
+                    <input type="number" id="next-term-credits" min="1" placeholder="e.g. 20">
+                </div>
+                <button onclick="calculateTargetCGPA()">Present Roadmap</button>
+                <span style="font-weight: bold; color: #ea4335; font-size: 1.08rem; margin-left: 1.2rem; vertical-align: middle; display: inline-block;">Cool to score 3s on the basketball court — not on your grade sheet.</span>
+                <div id="target-cgpa-result" class="result-card" style="display: none;">
+                    <h3>Roadmap to Target CGPA</h3>
+                    <div id="target-cgpa-details"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="gpa" class="tab-content">
+            <div class="card">
+                <h2>Term GPA Calculator</h2>
+                <p>Calculate your GPA for any term.</p>
+                
+                <div id="gpa-courses">
+                    <!-- Course inputs will be added here -->
+                </div>
+                
+                <button class="add-course-btn" onclick="addCourseInput('gpa')">
+                    <span>+</span> Add Course
+                </button>
+                
+                <button onclick="calculateGPA()">Calculate GPA</button>
+                
+                <div id="gpa-result" class="result-card" style="display: none;">
+                    <h3>Your Term GPA</h3>
+                    <p id="gpa-value" style="font-size: 1.5rem; font-weight: bold;"></p>
+                    <div id="gpa-details"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="cgpa" class="tab-content">
+            <div class="card">
+                <h2>Cumulative GPA Calculator</h2>
+                <p>Calculate your updated CGPA after this term.</p>
+                <div class="form-group">
+                    <label for="current-cgpa-cgpa">Current CGPA:</label>
+                    <input type="number" id="current-cgpa-cgpa" step="0.01" min="0" max="10" placeholder="e.g. 7.2">
+                </div>
+                <div class="form-group">
+                    <label for="completed-credits-cgpa">Total Credits Completed:</label>
+                    <input type="number" id="completed-credits-cgpa" min="1" placeholder="e.g. 60">
+                </div>
+                <hr style="margin: 1.5rem 0;">
+                <h3>This Term's Courses</h3>
+                <div id="cgpa-courses">
+                    <!-- Course inputs will be added here -->
+                </div>
+                <button class="add-course-btn" onclick="addCourseInput('cgpa')">
+                    <span>+</span> Add Course
+                </button>
+                <button onclick="calculateCGPA()">Calculate CGPA</button>
+                <div id="cgpa-result" class="result-card" style="display: none;">
+                    <h3>Your Updated Cumulative GPA</h3>
+                    <p id="cgpa-value" style="font-size: 1.5rem; font-weight: bold;"></p>
+                    <div id="cgpa-details"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div id="info" class="tab-content">
+            <div class="card">
+                <h2>Vijaybhoomi University Grading System</h2>
+                <p>Understanding how GPA and CGPA are calculated</p>
+                
+                <h3>Grade Points</h3>
+                <table class="grade-table">
+                    <tr>
+                        <th>Grade</th>
+                        <th>A+</th>
+                        <th>A</th>
+                        <th>B+</th>
+                        <th>B</th>
+                        <th>C+</th>
+                        <th>C</th>
+                        <th>D</th>
+                        <th>E</th>
+                        <th>NC*</th>
+                    </tr>
+                    <tr>
+                        <td>Grade Point</td>
+                        <td>10</td>
+                        <td>9</td>
+                        <td>8</td>
+                        <td>7</td>
+                        <td>6</td>
+                        <td>5</td>
+                        <td>4</td>
+                        <td>2</td>
+                        <td>0</td>
+                    </tr>
+                </table>
+                <p>NC* = Not Cleared</p>
+                
+                <h3>GPA Calculation</h3>
+                <p>The term GPA is calculated as:</p>
+                <div style="background-color: #f5f5f5; padding: 1rem; border-radius: 4px; margin: 1rem 0; text-align: center;">
+                    GPA = Σ(Course Credit × Grade Point Earned) / Σ(Course Credit)
+                </div>
+                <p>Only includes courses from the current term.</p>
+                
+                <h3>CGPA Calculation</h3>
+                <p>The cumulative GPA is calculated as:</p>
+                <div style="background-color: #f5f5f5; padding: 1rem; border-radius: 4px; margin: 1rem 0; text-align: center;">
+                    CGPA = Σ(Course Credit × Grade Point Earned) / Σ(Course Credit)
+                </div>
+                <p>Includes all courses across all terms.</p>
+                
+                <h3>Important Rules</h3>
+                <ul style="list-style-type: disc; padding-left: 1.5rem; margin: 1rem 0;">
+                    <li>A student receiving an 'NC' in any course must re-register for the course and clear it before graduating.</li>
+                    <li>A participant who scores less than 30% for an end-term assessment will not be eligible for a grade above "D" in such courses.</li>
+                    <li>Participants who receive a 'C', 'D', or 'E' grade may register for the course in subsequent terms to improve their grade.</li>
+                </ul>
+                <p style="margin-top:1rem; font-weight:500;">To know more about your official academic guidelines visit here <a href="https://vijaybhoomischool-my.sharepoint.com/:b:/r/personal/sharad_pulate_vijaybhoomi_edu_in/Documents/Desktop/Old%20Data/VU/14.%20Academic%20Guidelines/Approved%20by%20Hon%27ble%20Chancellor/05.%20Academic%20Guidelines%20for%20UG%20Programs%20for%20AY%202024-25.pdf?csf=1&web=1&e=VYCUDs" target="_blank">05. Academic Guidelines for UG Programs for AY 2024-25.pdf</a></p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Initialize the app when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            showWelcomeOnce();
+            // Register service worker for PWA
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(reg => console.log('Service Worker registered'))
+                    .catch(err => console.log('Service Worker registration failed', err));
+            }
+        });
+        
+        // Load profile data from local storage
+        function loadProfileData() {
+            const name = localStorage.getItem('student-name');
+            const program = localStorage.getItem('student-program');
+            const roll = localStorage.getItem('student-roll');
+            
+            if (name) document.getElementById('student-name').value = name;
+            if (program) document.getElementById('student-program').value = program;
+            if (roll) document.getElementById('student-roll').value = roll;
+            
+            if (name || program || roll) {
+                updateProfileDisplay();
+            }
+        }
+        
+        // Save profile data
+        function saveProfile() {
+            const name = document.getElementById('student-name').value.trim();
+            const program = document.getElementById('student-program').value.trim();
+            const roll = document.getElementById('student-roll').value.trim();
+            
+            if (!name || !program || !roll) {
+                alert('Please fill in all profile fields.');
+                return;
+            }
+            
+            // Save to local storage
+            localStorage.setItem('student-name', name);
+            localStorage.setItem('student-program', program);
+            localStorage.setItem('student-roll', roll);
+            
+            updateProfileDisplay();
+        }
+        
+        // Update profile display
+        function updateProfileDisplay() {
+            const name = localStorage.getItem('student-name');
+            const program = localStorage.getItem('student-program');
+            const roll = localStorage.getItem('student-roll');
+            
+            const detailsHtml = `
+                <table>
+                    <tr>
+                        <td><strong>Name:</strong></td>
+                        <td>${name || ''}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Program:</strong></td>
+                        <td>${program || ''}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Roll No:</strong></td>
+                        <td>${roll || ''}</td>
+                    </tr>
+                </table>
+                <p style="margin-top: 0.5rem; font-style: italic;">Your profile information is saved locally on this device.</p>
+            `;
+            
+            document.getElementById('profile-details').innerHTML = detailsHtml;
+            document.getElementById('profile-saved').style.display = 'block';
+        }
+        
+        // Handle tab switching
+        function openTab(tabId) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => {
+                content.style.display = 'none';
+            });
+            
+            // Deactivate all tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show the selected tab content and activate the tab
+            document.getElementById(tabId).style.display = 'block';
+            document.querySelector(`.tab[onclick="openTab('${tabId}')"]`).classList.add('active');
+        }
+        
+        // Add a new course input row
+        function addCourseInput(type) {
+            const coursesContainer = document.getElementById(`${type}-courses`);
+            const courseCount = coursesContainer.children.length + 1;
+            
+            const courseRow = document.createElement('div');
+            courseRow.className = 'course-row';
+            courseRow.innerHTML = `
+                <div class="flex-grow">
+                    <input type="text" placeholder="Course ${courseCount}" class="course-name">
+                </div>
+                <div>
+                    <input type="number" placeholder="Credits" min="1" max="10" class="course-credit" style="width: 80px;">
+                </div>
+                <div>
+                    <select class="course-grade">
+                        <option value="">Grade</option>
+                        <option value="10">A+ (10)</option>
+                        <option value="9">A (9)</option>
+                        <option value="8">B+ (8)</option>
+                        <option value="7">B (7)</option>
+                        <option value="6">C+ (6)</option>
+                        <option value="5">C (5)</option>
+                        <option value="4">D (4)</option>
+                        <option value="2">E (2)</option>
+                        <option value="0">NC (0)</option>
+                    </select>
+                </div>
+                <button type="button" class="remove-btn" onclick="removeCourseInput(this)">×</button>
+            `;
+            
+            coursesContainer.appendChild(courseRow);
+        }
+        
+        // Remove a course input row
+        function removeCourseInput(button) {
+            const courseRow = button.parentElement;
+            courseRow.parentElement.removeChild(courseRow);
+        }
+        
+        // Calculate Term GPA
+        function calculateGPA() {
+            const courses = document.querySelectorAll('#gpa-courses .course-row');
+            let totalCredits = 0;
+            let totalGradePoints = 0;
+            let isValid = true;
+            let details = [];
+            
+            courses.forEach((course, index) => {
+                const courseName = course.querySelector('.course-name').value || `Course ${index + 1}`;
+                const creditInput = course.querySelector('.course-credit');
+                const gradeInput = course.querySelector('.course-grade');
+                
+                const credit = parseFloat(creditInput.value);
+                const grade = parseFloat(gradeInput.value);
+                
+                if (isNaN(credit) || isNaN(grade)) {
+                    isValid = false;
+                    if (isNaN(credit)) creditInput.style.borderColor = 'red';
+                    if (isNaN(grade)) gradeInput.style.borderColor = 'red';
+                    return;
+                } else {
+                    creditInput.style.borderColor = '';
+                    gradeInput.style.borderColor = '';
+                }
+                
+                const courseGradePoints = credit * grade;
+                totalCredits += credit;
+                totalGradePoints += courseGradePoints;
+                
+                details.push({
+                    name: courseName,
+                    credit: credit,
+                    grade: getGradeLetter(grade),
+                    gradePoint: grade,
+                    courseGradePoints: courseGradePoints
+                });
+            });
+            
+            if (!isValid) {
+                alert('Please fill in all course credits and grades correctly.');
+                return;
+            }
+            
+            const gpa = totalCredits > 0 ? (totalGradePoints / totalCredits).toFixed(2) : 0;
+            
+            // Display the results
+            document.getElementById('gpa-value').textContent = gpa;
+            
+            const detailsHtml = `
+                <table>
+                    <tr>
+                        <th>Course</th>
+                        <th>Credits</th>
+                        <th>Grade</th>
+                        <th>Grade Points</th>
+                        <th>Credit × Grade</th>
+                    </tr>
+                    ${details.map(d => `
+                        <tr>
+                            <td>${d.name}</td>
+                            <td>${d.credit}</td>
+                            <td>${d.grade}</td>
+                            <td>${d.gradePoint}</td>
+                            <td>${d.courseGradePoints}</td>
+                        </tr>
+                    `).join('')}
+                    <tr style="font-weight: bold;">
+                        <td>Total</td>
+                        <td>${totalCredits}</td>
+                        <td></td>
+                        <td></td>
+                        <td>${totalGradePoints.toFixed(2)}</td>
+                    </tr>
+                </table>
+                <p>GPA = ${totalGradePoints.toFixed(2)} ÷ ${totalCredits} = ${gpa}</p>
+            `;
+            
+            document.getElementById('gpa-details').innerHTML = detailsHtml;
+            document.getElementById('gpa-result').style.display = 'block';
+        }
+        
+        // Calculate Cumulative GPA
+        function calculateCGPA() {
+            // Get current CGPA and completed credits
+            const currentCGPA = parseFloat(document.getElementById('current-cgpa-cgpa').value);
+            const completedCredits = parseInt(document.getElementById('completed-credits-cgpa').value);
+            const courses = document.querySelectorAll('#cgpa-courses .course-row');
+            let termCredits = 0;
+            let termGradePoints = 0;
+            let isValid = true;
+            let details = [];
+
+            courses.forEach((course, index) => {
+                const courseName = course.querySelector('.course-name').value || `Course ${index + 1}`;
+                const creditInput = course.querySelector('.course-credit');
+                const gradeInput = course.querySelector('.course-grade');
+
+                const credit = parseFloat(creditInput.value);
+                const grade = parseFloat(gradeInput.value);
+
+                if (isNaN(credit) || isNaN(grade)) {
+                    isValid = false;
+                    if (isNaN(credit)) creditInput.style.borderColor = 'red';
+                    if (isNaN(grade)) gradeInput.style.borderColor = 'red';
+                    return;
+                } else {
+                    creditInput.style.borderColor = '';
+                    gradeInput.style.borderColor = '';
+                }
+
+                const courseGradePoints = credit * grade;
+                termCredits += credit;
+                termGradePoints += courseGradePoints;
+
+                details.push({
+                    name: courseName,
+                    credit: credit,
+                    grade: getGradeLetter(grade),
+                    gradePoint: grade,
+                    courseGradePoints: courseGradePoints
+                });
+            });
+
+            if (!isValid) {
+                alert('Please fill in all course credits and grades correctly.');
+                return;
+            }
+
+            if (isNaN(currentCGPA) || isNaN(completedCredits) || completedCredits <= 0) {
+                alert('Please enter your current CGPA and total credits completed.');
+                return;
+            }
+
+            const currentTotalPoints = currentCGPA * completedCredits;
+            const newTotalCredits = completedCredits + termCredits;
+            const newTotalPoints = currentTotalPoints + termGradePoints;
+            const cgpa = newTotalCredits > 0 ? (newTotalPoints / newTotalCredits).toFixed(2) : 0;
+
+            // Display the results
+            document.getElementById('cgpa-value').textContent = cgpa;
+
+            const detailsHtml = `
+                <table>
+                    <tr>
+                        <th>Course</th>
+                        <th>Credits</th>
+                        <th>Grade</th>
+                        <th>Grade Points</th>
+                        <th>Credit × Grade</th>
+                    </tr>
+                    ${details.map(d => `
+                        <tr>
+                            <td>${d.name}</td>
+                            <td>${d.credit}</td>
+                            <td>${d.grade}</td>
+                            <td>${d.gradePoint}</td>
+                            <td>${d.courseGradePoints}</td>
+                        </tr>
+                    `).join('')}
+                    <tr style="font-weight: bold;">
+                        <td>This Term Total</td>
+                        <td>${termCredits}</td>
+                        <td></td>
+                        <td></td>
+                        <td>${termGradePoints.toFixed(2)}</td>
+                    </tr>
+                </table>
+                <p>Updated CGPA = (${currentCGPA} × ${completedCredits} + ${termGradePoints.toFixed(2)}) ÷ (${completedCredits} + ${termCredits}) = <b>${cgpa}</b></p>
+            `;
+
+            document.getElementById('cgpa-details').innerHTML = detailsHtml;
+            document.getElementById('cgpa-result').style.display = 'block';
+        }
+        
+        // Helper function to convert grade points to letter grades
+        function getGradeLetter(gradePoint) {
+            switch (parseFloat(gradePoint)) {
+                case 10: return 'A+';
+                case 9: return 'A';
+                case 8: return 'B+';
+                case 7: return 'B';
+                case 6: return 'C+';
+                case 5: return 'C';
+                case 4: return 'D';
+                case 2: return 'E';
+                case 0: return 'NC';
+                default: return '';
+            }
+        }
+        
+        // --- Target CGPA Roadmap Function ---
+        function calculateTargetCGPA() {
+            const currentCGPA = parseFloat(document.getElementById('current-cgpa').value);
+            const completedCredits = parseInt(document.getElementById('completed-credits').value);
+            const targetCGPA = parseFloat(document.getElementById('target-cgpa-input').value);
+            const nextTermCredits = parseInt(document.getElementById('next-term-credits').value);
+
+            if (
+                isNaN(currentCGPA) ||
+                isNaN(completedCredits) ||
+                isNaN(targetCGPA) ||
+                isNaN(nextTermCredits) ||
+                completedCredits <= 0 ||
+                nextTermCredits <= 0
+            ) {
+                alert('Please fill in all fields with valid numbers.');
+                return;
+            }
+
+            // Calculation logic
+            const currentTotalPoints = currentCGPA * completedCredits;
+            const totalCredits = completedCredits + nextTermCredits;
+            const requiredTotalPoints = targetCGPA * totalCredits;
+            const requiredNextTermPoints = requiredTotalPoints - currentTotalPoints;
+            const requiredGPA = requiredNextTermPoints / nextTermCredits;
+
+            // Map GPA to grade
+            let grade = '';
+            if (requiredGPA >= 10) grade = 'A+';
+            else if (requiredGPA >= 9) grade = 'A';
+            else if (requiredGPA >= 8) grade = 'B+';
+            else if (requiredGPA >= 7) grade = 'B';
+            else if (requiredGPA >= 6) grade = 'C+';
+            else if (requiredGPA >= 5) grade = 'C';
+            else if (requiredGPA >= 4) grade = 'D';
+            else if (requiredGPA >= 2) grade = 'E';
+            else grade = 'NC (Not Cleared)';
+
+            let advice = '';
+            if (requiredGPA > 10) {
+                advice = 'It is not possible to reach your target CGPA in the next term with the given inputs.';
+            } else if (requiredGPA < 0) {
+                advice = 'Your target CGPA is already achieved!';
+            } else {
+                advice = `You need to score at least an average of <b>${grade}</b> (GPA: <b>${requiredGPA.toFixed(2)}</b>) in your next term to reach your target CGPA.`;
+            }
+
+            const detailsHtml = `
+                <table>
+                    <tr><td>Current CGPA:</td><td>${currentCGPA}</td></tr>
+                    <tr><td>Completed Credits:</td><td>${completedCredits}</td></tr>
+                    <tr><td>Target CGPA:</td><td>${targetCGPA}</td></tr>
+                    <tr><td>Next Term Credits:</td><td>${nextTermCredits}</td></tr>
+                    <tr><td>Required Next Term GPA:</td><td><b>${requiredGPA.toFixed(2)}</b></td></tr>
+                    <tr><td>Minimum Grade Needed:</td><td><b>${grade}</b></td></tr>
+                </table>
+                <p style="margin-top:1rem;">${advice}</p>
+            `;
+            document.getElementById('target-cgpa-details').innerHTML = detailsHtml;
+            document.getElementById('target-cgpa-result').style.display = 'block';
+        }
+
+        // Set welcome greeting based on time of day
+        function setWelcomeGreeting() {
+            const greetingElem = document.getElementById('welcome-greeting');
+            if (!greetingElem) return;
+            const now = new Date();
+            const hour = now.getHours();
+            let greeting = 'Welcome!';
+            let extra = '';
+            if (hour >= 5 && hour < 12) greeting = 'Good morning!';
+            else if (hour >= 12 && hour < 17) greeting = 'Good afternoon!';
+            else {
+                greeting = 'Good evening!';
+                extra = "<div style='margin-top:0.5rem;'>We're glad to have you at MayoGo</div>";
+            }
+            greetingElem.innerHTML = greeting + extra;
+        }
+
+        // Show Welcome page only once per visit
+        function showWelcomeOnce() {
+            const welcomeShown = sessionStorage.getItem('welcome-shown');
+            const welcomeDiv = document.getElementById('welcome');
+            const mainTabs = document.getElementById('main-tabs');
+            const mainAppMsg = document.getElementById('main-app-message');
+            const mainHeader = document.getElementById('main-header');
+            if (!welcomeShown) {
+                // Hide everything except welcome
+                welcomeDiv.style.display = 'block';
+                mainTabs.style.display = 'none';
+                mainAppMsg.style.display = 'none';
+                if (mainHeader) mainHeader.style.display = 'none';
+                document.querySelectorAll('.tab-content').forEach(tc => tc.style.display = 'none');
+                setWelcomeGreeting();
+                document.getElementById('welcome-continue-btn').onclick = function() {
+                    welcomeDiv.style.display = 'none';
+                    mainTabs.style.display = 'flex';
+                    mainAppMsg.style.display = 'block';
+                    if (mainHeader) mainHeader.style.display = '';
+                    document.querySelectorAll('.tab-content').forEach(tc => tc.style.display = 'none');
+                    document.getElementById('profile').style.display = 'block';
+                    document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+                    document.querySelector('.tab[onclick="openTab(\'profile\')"]').classList.add('active');
+                    sessionStorage.setItem('welcome-shown', '1');
+                };
+            } else {
+                welcomeDiv.style.display = 'none';
+                mainTabs.style.display = 'flex';
+                mainAppMsg.style.display = 'block';
+                if (mainHeader) mainHeader.style.display = '';
+                document.querySelectorAll('.tab-content').forEach(tc => tc.style.display = 'none');
+                document.getElementById('profile').style.display = 'block';
+                document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+                document.querySelector('.tab[onclick="openTab(\'profile\')"]').classList.add('active');
+            }
+        }
+    </script>
+</body>
+</html>
